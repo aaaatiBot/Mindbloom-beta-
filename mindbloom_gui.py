@@ -2,6 +2,11 @@ import pygame
 import sys
 import math
 
+# ---- Family Album launcher (runs inline, returns to menu when done) ----
+def _run_family_album():
+    from family_album_game import run as _fa
+    _fa(screen=screen, clock=clock, return_callback=None)
+
 # ============================================================
 # MINDBLOOM - Main Menu
 # A responsive GUI inspired by the provided reference image.
@@ -32,8 +37,9 @@ CARD_COLORS = [
     (108, 106, 225),  # Color Garden
     (202, 48, 111),   # What Is This?
     (48, 157, 82),    # Garden Sorting
-    (166, 57, 45),   # Which One Belongs?
+    (166, 57, 45),    # Which One Belongs?
     (119, 82, 181),   # Memory Peek
+    (60, 140, 200),   # Family Album
 ]
 
 GAME_NAMES = [
@@ -43,6 +49,7 @@ GAME_NAMES = [
     "GARDEN SORTING",
     "WHICH ONE BELONGS?",
     "MEMORY PEEK",
+    "FAMILY ALBUM",
 ]
 
 # -------------------- FONT HELPER --------------------
@@ -147,18 +154,18 @@ def calculate_layout(width, height):
 
     cards = []
 
-    for row in range(2):
-        for col in range(3):
-            x = grid_x + col * (card_width + gap_x)
+    for row in range(3):                             # 3 rows for 7 cards
+        cols_in_row = 3 if row < 2 else 1            # last row: 1 centred card
+        row_w = cols_in_row * card_width + (cols_in_row - 1) * gap_x
+        row_x = (width - row_w) / 2
+        for col in range(cols_in_row):
+            idx = row * 3 + col
+            if idx >= len(GAME_NAMES):
+                break
+            x = row_x + col * (card_width + gap_x)
             y = grid_y + row * (card_height + gap_y)
-            cards.append(
-                pygame.Rect(
-                    round(x),
-                    round(y),
-                    round(card_width),
-                    round(card_height)
-                )
-            )
+            cards.append(pygame.Rect(round(x), round(y),
+                                     round(card_width), round(card_height)))
 
     return cards, title_y, subtitle_y, score_y
 
@@ -192,6 +199,8 @@ while running:
                 if rect.collidepoint(mouse):
                     selected_game = GAME_NAMES[i]
                     print(f"Selected: {selected_game}")
+                    if i == 6:          # Family Album
+                        _run_family_album()
 
     width, height = screen.get_size()
 
